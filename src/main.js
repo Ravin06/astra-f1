@@ -114,6 +114,39 @@ class App {
         400,
         280,
       );
+      // Overlay the entire centerline so every destination is recognizable.
+      ctx.fillStyle = "rgba(10,23,30,.36)";
+      ctx.fillRect(0, 0, 400, 280);
+      const b = t.bounds,
+        scale = Math.min(310 / (b.maxX - b.minX), 185 / (b.maxZ - b.minZ));
+      const offsetX = (400 - (b.maxX - b.minX) * scale) / 2,
+        offsetZ = (280 - (b.maxZ - b.minZ) * scale) / 2;
+      ctx.beginPath();
+      t.points.forEach((p, i) => {
+        const x = offsetX + (p.x - b.minX) * scale,
+          y = offsetZ + (p.z - b.minZ) * scale;
+        if (i) ctx.lineTo(x, y);
+        else ctx.moveTo(x, y);
+      });
+      ctx.closePath();
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "#142b32";
+      ctx.lineWidth = 11;
+      ctx.stroke();
+      ctx.strokeStyle = "#f5eada";
+      ctx.lineWidth = 5;
+      ctx.stroke();
+      const line = t.at(0.008);
+      ctx.fillStyle = "#f8794b";
+      ctx.beginPath();
+      ctx.arc(
+        offsetX + (line.x - b.minX) * scale,
+        offsetZ + (line.z - b.minZ) * scale,
+        7,
+        0,
+        Math.PI * 2,
+      );
+      ctx.fill();
       this.ui.previews[t.data.id] = c.toDataURL("image/webp", 0.84);
     }
   }
@@ -146,24 +179,22 @@ class App {
     this.graphics.buildWorld(this.tracks[this.selectedTrack], config.weather);
     const profiles = [
       this.profile,
-      ...this.race.karts
-        .slice(1)
-        .map((k, i) => ({
-          ...structuredClone(DEFAULT_PROFILE),
-          vehicle: VEHICLES[i % 3].id,
-          color: VEHICLES[i % 3].color,
-          helmet: [
-            "#b8cb66",
-            "#81b5c4",
-            "#d89a61",
-            "#d56369",
-            "#c9c3b3",
-            "#778397",
-            "#c2d2d0",
-          ][i],
-          suit: i % 2 ? "#283d43" : "#e7dfcc",
-          number: String(12 + i * 7),
-        })),
+      ...this.race.karts.slice(1).map((k, i) => ({
+        ...structuredClone(DEFAULT_PROFILE),
+        vehicle: VEHICLES[i % 3].id,
+        color: VEHICLES[i % 3].color,
+        helmet: [
+          "#b8cb66",
+          "#81b5c4",
+          "#d89a61",
+          "#d56369",
+          "#c9c3b3",
+          "#778397",
+          "#c2d2d0",
+        ][i],
+        suit: i % 2 ? "#283d43" : "#e7dfcc",
+        number: String(12 + i * 7),
+      })),
     ];
     this.graphics.setKarts(profiles);
     this.navigate("race");

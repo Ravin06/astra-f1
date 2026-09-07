@@ -5,7 +5,7 @@ Environment: Node.js 22.22.0, Vite 7.3.6, Three.js 0.180.0, Chromium 1228 throug
 ## Passed
 
 - Production compilation and bundling with `npm run build`.
-- Eleven simulation tests using `npm test`, including complete AI laps on all tracks and six-kart wet races on all tracks.
+- Fourteen simulation tests using `npm test`, including complete AI laps and six-car wet races on all four Grand Circuit tracks, declared track dimensions, preserved legacy records, and Suzuka's 10 m crossover clearance with height-aware collisions.
 - Track closure, projection onto the racing spline, and geometry continuity at the start line.
 - Identical simulation outcomes across 30 Hz and 120 Hz render update groupings.
 - Drift accumulation and release boost; meaningful tuning trade-offs.
@@ -17,7 +17,8 @@ Environment: Node.js 22.22.0, Vite 7.3.6, Three.js 0.180.0, Chromium 1228 throug
 - Browser startup with no uncaught runtime or render errors in the final general regression run.
 - Vehicle/driver selection, paint/preset interaction, and preserved named builds after browser reload.
 - Real keyboard acceleration changes speed and world position; pause/resume and camera switching work.
-- All three track selection paths render; screenshots captured for each.
+- All four track selection paths render; screenshots captured for each.
+- A complete keyboard-driven Marina Bay lap finished in 109.058 seconds with ordered checkpoints, followed by successful results, replay pause/seek, and saved-record checks. No runtime errors were reported. This automated driving time is not a performance benchmark.
 - Desktop 1440 × 1000 and narrow 390 × 844 layouts were visually inspected. A separate test found and corrected overlapping controls at 800 × 600.
 - npm reported zero dependency vulnerabilities after the build tool update and final formatter installation.
 
@@ -28,6 +29,8 @@ Environment: Node.js 22.22.0, Vite 7.3.6, Three.js 0.180.0, Chromium 1228 throug
 The complete-race test uses a reduced pixel ratio for software rendering. Set `CHROMIUM_PATH` to an installed Chromium if the automatically detected development-machine binary is unavailable. Both browser scripts require the server to be running.
 
 ## Remaining validation
+
+Grand Circuit revision: the production build, all 14 simulation tests, four-track general browser regression, and complete-race results/replay/record regression passed. The general browser run reported no runtime/render errors or horizontal overflow at 390 px. Subsequent mobile camera, circuit-outline preview, and tunnel alignment adjustments compiled successfully; the complete-race test ran against the final source. The replay range-input error found in the previous complete-race test has been fixed and its pause/seek flow verified.
 
 - Real GPU performance and prolonged races on the user's target hardware.
 - Physical gamepad, steering wheel and touchscreen hardware.

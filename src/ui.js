@@ -59,9 +59,13 @@ export class UI {
         );
     });
     this.root.addEventListener("input", (e) => {
-      if (e.target.type === "range")
-        e.target.previousElementSibling.querySelector("output").textContent =
-          Number(e.target.value).toFixed(e.target.step === "1" ? 0 : 2);
+      if (e.target.type === "range") {
+        const output = e.target.closest(".field")?.querySelector("output");
+        if (output)
+          output.textContent = Number(e.target.value).toFixed(
+            e.target.step === "1" ? 0 : 2,
+          );
+      }
     });
   }
   toast(text) {
@@ -73,7 +77,7 @@ export class UI {
   }
   header(page) {
     const p = this.app.profile;
-    return `<header class="topbar"><button class="logo" data-action="home" aria-label="APEX home">APEX<span>/</span><small>COASTLINE RACING</small></button><nav aria-label="Main navigation">${[
+    return `<header class="topbar"><button class="logo" data-action="home" aria-label="APEX home">APEX<span>/</span><small>GRAND CIRCUIT</small></button><nav aria-label="Main navigation">${[
       ["home", "PLAY"],
       ["garage", "GARAGE"],
       ["driver", "DRIVER"],
@@ -88,7 +92,7 @@ export class UI {
       )}</nav><div class="profile"><span class="online-dot"></span><span>LOCAL DRIVER<small>${escapeHTML(DRIVERS[p.driver].name.toUpperCase())}</small></span><button class="number-avatar" data-action="driver" aria-label="Customize driver">${p.number}</button><button class="settings-button" data-action="settings" aria-label="Settings">⚙</button></div></header>`;
   }
   footer() {
-    return `<footer class="footer"><span><span class="status-dot"></span> ALL ROADS. ALL YOURS.</span><div><span><kbd>W A S D</kbd> DRIVE</span><span><kbd>SPACE</kbd> DRIFT</span><span><kbd>SHIFT</kbd> BOOST</span></div><button data-action="help">CONTROLS <span>↗</span></button></footer>`;
+    return `<footer class="footer"><span><span class="status-dot"></span> FOUR CIRCUITS. YOUR RACING LINE.</span><div><span><kbd>W A S D</kbd> DRIVE</span><span><kbd>SPACE</kbd> DRIFT</span><span><kbd>SHIFT</kbd> BOOST</span></div><button data-action="help">CONTROLS <span>↗</span></button></footer>`;
   }
   render() {
     const a = this.app,
@@ -117,7 +121,7 @@ export class UI {
     }
     let content = "";
     if (page === "home")
-      content = `<main class="home-content"><section class="hero-copy"><div class="eyebrow"><span class="orange-line"></span> FIND YOUR NEXT APEX</div><h1>GOOD LINES.<br><em>GREAT TIMES.</em></h1><p>Chase the coast. Own the corners.<br>A little rivalry goes a long way.</p><div class="hero-actions"><button class="primary" data-action="start">LET’S RACE <span>→</span></button><button class="round-button" data-action="setup" aria-label="Configure race">≡</button><span class="race-summary">${a.config.mode === "trial" ? "TIME TRIAL" : a.config.mode === "practice" ? "FREE DRIVE" : `${a.config.laps} LAPS · ${a.config.opponents + 1} RACERS`}<small>${a.config.weather.toUpperCase()} CONDITIONS</small></span></div></section><div class="kart-caption"><span class="eyebrow">YOUR CURRENT RIDE</span><h3>${v.name} <span>/${String(VEHICLES.indexOf(v) + 1).padStart(2, "0")}</span></h3><button data-action="garage">MAKE IT YOURS ${arrow}</button></div><section class="destinations"><div class="section-top"><span><b>CHOOSE YOUR ESCAPE</b><span class="muted"> / 03 ORIGINAL CIRCUITS</span></span><button data-action="setup">RACE SETUP ${arrow}</button></div><div class="track-list">${TRACKS.map((t, i) => `<button class="track-card ${i === a.selectedTrack ? "selected" : ""}" data-action="track" data-value="${i}"><div class="track-image" style="background-image:url('${this.previews[t.id] || ""}')"><span class="track-index">0${i + 1}</span><span class="track-selected">${i === a.selectedTrack ? "✓" : ""}</span></div><div class="track-info"><span class="track-region">${t.region}</span><h3>${t.name}<span>↗</span></h3><div class="track-meta"><span>${i === 0 ? "FLOWING" : i === 1 ? "TECHNICAL" : "HIGH SPEED"} <i>•</i> ${Math.round(a.tracks[i].length)} M</span><span class="difficulty" aria-label="Difficulty ${t.difficulty} of 5">${Array.from({ length: 5 }, (_, j) => `<i class="${j < t.difficulty ? "on" : ""}"></i>`).join("")}</span></div></div></button>`).join("")}</div></section></main>`;
+      content = `<main class="home-content"><section class="hero-copy"><div class="eyebrow"><span class="orange-line"></span> FIND YOUR NEXT APEX</div><h1>LATE BRAKES.<br><em>FAST LAPS.</em></h1><p>Four legendary destinations.<br>One very personal racing line.</p><div class="hero-actions"><button class="primary" data-action="start">LET’S RACE <span>→</span></button><button class="round-button" data-action="setup" aria-label="Configure race">≡</button><span class="race-summary">${a.config.mode === "trial" ? "TIME TRIAL" : a.config.mode === "practice" ? "FREE DRIVE" : `${a.config.laps} LAPS · ${a.config.opponents + 1} RACERS`}<small>${a.config.weather.toUpperCase()} CONDITIONS</small></span></div></section><div class="kart-caption"><span class="eyebrow">YOUR SINGLE-SEATER</span><h3>${v.name} <span>/${String(VEHICLES.indexOf(v) + 1).padStart(2, "0")}</span></h3><button data-action="garage">MAKE IT YOURS ${arrow}</button></div><section class="destinations"><div class="section-top"><span><b>CHOOSE YOUR CIRCUIT</b><span class="muted"> / 04 GRAND PRIX INSPIRED</span></span><button data-action="setup">RACE SETUP ${arrow}</button></div><div class="track-list">${TRACKS.map((t, i) => `<button class="track-card ${i === a.selectedTrack ? "selected" : ""}" data-action="track" data-value="${i}"><div class="track-image" style="background-image:url('${this.previews[t.id] || ""}')"><span class="track-index">0${i + 1}</span><span class="track-selected">${i === a.selectedTrack ? "✓" : ""}</span></div><div class="track-info"><span class="track-region">${t.region}</span><h3>${t.name}<span>↗</span></h3><div class="track-meta"><span>${t.style} <i>•</i> ${Math.round(a.tracks[i].length)} M</span><span class="difficulty" aria-label="Difficulty ${t.difficulty} of 5">${Array.from({ length: 5 }, (_, j) => `<i class="${j < t.difficulty ? "on" : ""}"></i>`).join("")}</span></div></div></button>`).join("")}</div></section></main>`;
     if (page === "garage") {
       const stats = vehicleStats(p);
       content = `<main class="workshop"><section class="workshop-panel"><span class="eyebrow">THE PADDOCK / VEHICLE STUDIO</span><h1>Your ride.<br><em>Your rules.</em></h1><div class="segmented">${VEHICLES.map((car) => `<button class="${p.vehicle === car.id ? "active" : ""}" data-action="vehicle" data-value="${car.id}">${car.name}</button>`).join("")}</div><div class="workshop-scroll"><div class="subheading">01 / FINISH & DETAILS</div>${colors("color", p.color)}<div class="form-grid">${select(
@@ -129,7 +133,7 @@ export class UI {
           ["matte", "Matte finish"],
         ],
       )}${select("Rear aero", "spoiler", p.spoiler, [
-        ["true", "RS rear wing"],
+        ["true", "Formula rear wing"],
         ["false", "Clean tail"],
       ])}</div><div class="subheading">02 / PERFORMANCE TUNING</div>${range("Engine output", "tuning.engine", p.tuning.engine, 0.8, 1.25)}${range("Tire grip", "tuning.grip", p.tuning.grip, 0.8, 1.2)}${range("Downforce", "tuning.aero", p.tuning.aero, 0, 1)}${range("Steering ratio", "tuning.steering", p.tuning.steering, 0.7, 1.3)}<p class="fine-print">More power adds mass. More downforce trades top speed for cornering grip.</p><div class="subheading">03 / YOUR BUILDS</div><div class="preset-save"><input id="preset-name" maxlength="28" aria-label="Build name" placeholder="Name this build"><button class="secondary" data-action="save-preset">SAVE</button></div>${p.presets.length ? `<div class="preset-list">${p.presets.map((pr, i) => `<button data-action="load-preset" data-value="${i}">${escapeHTML(pr.name)} <span>LOAD ↗</span></button>`).join("")}</div>` : ""}<div class="button-row"><button class="text-button" data-action="export">EXPORT BUILD ↗</button><button class="text-button" data-action="import">IMPORT BUILD ↙</button></div></div></section><aside class="spec-sheet"><span class="eyebrow">${v.tag}</span><h2>${v.name}</h2><p>${v.text}</p><div class="spec-main"><strong>${Math.round(stats.maxSpeed * 3.6)}</strong><span>KM/H<br>DESIGN LIMIT</span></div><div class="spec-bars">${[
         ["POWER", stats.power / 24],
@@ -256,7 +260,7 @@ export class UI {
     $("position").textContent = r.position;
     $("racers").textContent = `/ ${r.karts.length}`;
     $("lap").innerHTML =
-      `${Math.min(k.laps + 1, r.config.laps)} <small>/ ${r.config.mode === "practice" ? "∞" : r.config.laps}</small>`;
+      `${r.config.mode === "practice" ? k.laps + 1 : Math.min(k.laps + 1, r.config.laps)} <small>/ ${r.config.mode === "practice" ? "∞" : r.config.laps}</small>`;
     $("time").innerHTML = clock(r.time);
     $("best-lap").textContent = k.lapTimes.length
       ? plainTime(Math.min(...k.lapTimes))
@@ -342,6 +346,6 @@ export class UI {
     const a = this.app,
       r = a.race,
       k = r.player;
-    return `<div class="results-backdrop"><main class="results"><span class="eyebrow">${TRACKS[a.selectedTrack].name.toUpperCase()} / RACE COMPLETE</span><div class="results-title"><h1>${r.finishPosition === 1 ? "A view from<br><em>the top.</em>" : "What<br><em>a ride.</em>"}</h1><div class="finish-number">${String(r.finishPosition).padStart(2, "0")}<span>FINISH POSITION</span></div></div><div class="results-metrics"><div><span>TOTAL TIME</span><strong>${clock(k.finishTime)}</strong></div><div><span>BEST LAP</span><strong>${clock(Math.min(...k.lapTimes))}</strong></div><div><span>DISTANCE</span><strong>${(k.distance / 1000).toFixed(2)}<small> KM</small></strong></div></div><div class="result-table">${r.ordered.map((kart, i) => `<div class="${kart.id === 0 ? "you" : ""}"><span>${String(i + 1).padStart(2, "0")}</span><b>${kart.id === 0 ? DRIVERS[a.profile.driver].name : ["Remi Cross", "Sora Vale", "Nico Flint", "Kit Moreno", "Ash Calder", "Eli Hart", "Toni Ray"][kart.id - 1]} ${kart.id === 0 ? "<small>YOU</small>" : ""}</b><span>${kart.finished ? plainTime(kart.finishTime) : `${Math.min(kart.laps + 1, r.config.laps)} / ${r.config.laps} LAPS · RACING`}</span></div>`).join("")}</div><div class="button-row"><button class="primary" data-action="restart">RACE AGAIN <span>→</span></button><button class="secondary" data-action="replay">WATCH REPLAY ↗</button><button class="text-button" data-action="home">BACK TO PADDOCK</button></div></main></div>`;
+    return `<div class="results-backdrop"><main class="results"><span class="eyebrow">${TRACKS[a.selectedTrack].name.toUpperCase()} / RACE COMPLETE</span><div class="results-title"><h1>${r.finishPosition === 1 ? "A view from<br><em>the top.</em>" : "What<br><em>a ride.</em>"}</h1><div class="finish-number">${String(r.finishPosition).padStart(2, "0")}<span>FINISH POSITION</span></div></div><div class="results-metrics"><div><span>TOTAL TIME</span><strong>${clock(k.finishTime)}</strong></div><div><span>BEST LAP</span><strong>${clock(Math.min(...k.lapTimes))}</strong></div><div><span>DISTANCE</span><strong>${(k.distance / 1000).toFixed(2)}<small> KM</small></strong></div></div><div class="result-table">${r.ordered.map((kart, i) => `<div class="${kart.id === 0 ? "you" : ""}"><span>${String(i + 1).padStart(2, "0")}</span><b>${kart.id === 0 ? DRIVERS[a.profile.driver].name : ["Remi Cross", "Sora Vale", "Nico Flint", "Kit Moreno", "Ash Calder", "Eli Hart", "Toni Ray"][kart.id - 1]} ${kart.id === 0 ? "<small>YOU</small>" : ""}</b><span>${kart.finished ? plainTime(kart.finishTime) : `${Math.min(kart.laps + 1, r.config.laps)} / ${r.config.laps} LAPS · UNFINISHED`}</span></div>`).join("")}</div><div class="button-row"><button class="primary" data-action="restart">RACE AGAIN <span>→</span></button><button class="secondary" data-action="replay">WATCH REPLAY ↗</button><button class="text-button" data-action="home">BACK TO PADDOCK</button></div></main></div>`;
   }
 }

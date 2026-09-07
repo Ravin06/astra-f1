@@ -2,10 +2,68 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { Track } from "../src/track.js";
 import { Race } from "../src/race.js";
-import { makeKart, stepKart, aiInput, STEP } from "../src/physics.js";
+import { makeKart, stepKart, aiInput, collide, STEP } from "../src/physics.js";
 import { TRACKS, DEFAULT_PROFILE, vehicleStats } from "../src/data.js";
 import { sanitize, importPreset, buildPreset } from "../src/persistence.js";
 const profile = () => structuredClone(DEFAULT_PROFILE);
+test("Grand Prix layouts use their declared arcade lengths and wider roads", () => {
+  assert.equal(TRACKS.length, 4);
+  for (const data of TRACKS) {
+    const t = new Track(data);
+    assert.ok(Math.abs(t.length - data.targetLength) < 0.5);
+    assert.ok(t.width >= 18);
+  }
+});
+test("Suzuka crossover has a clear upper deck and no cross-level collisions", () => {
+  const t = new Track(TRACKS.find((t) => t.id === "suzuka"));
+  let crossings = 0;
+  for (let i = 0; i < t.samples; i++) {
+    const a = t.points[i],
+      b = t.points[(i + 1) % t.samples];
+    for (let j = i + 30; j < t.samples; j++) {
+      if (i === 0 && j > t.samples - 30) continue;
+      const c = t.points[j],
+        d = t.points[(j + 1) % t.samples],
+        rx = b.x - a.x,
+        rz = b.z - a.z,
+        sx = d.x - c.x,
+        sz = d.z - c.z,
+        den = rx * sz - rz * sx;
+      if (Math.abs(den) < 0.00001) continue;
+      const u = ((c.x - a.x) * sz - (c.z - a.z) * sx) / den,
+        v = ((c.x - a.x) * rz - (c.z - a.z) * rx) / den;
+      if (u >= 0 && u <= 1 && v >= 0 && v <= 1) {
+        crossings++;
+        assert.ok(
+          Math.abs(
+            t.height((i + u) / t.samples) - t.height((j + v) / t.samples),
+          ) > 7,
+        );
+      }
+    }
+  }
+  assert.equal(crossings, 1);
+  const a = makeKart(t, vehicleStats(profile())),
+    b = makeKart(t, vehicleStats(profile()), 1);
+  Object.assign(a, { x: 0, z: 0, y: 0.35, vx: 10 });
+  Object.assign(b, { x: 1, z: 0, y: 10.35, vx: 0 });
+  collide(a, b);
+  assert.equal(a.vx, 10);
+  assert.equal(b.vx, 0);
+  assert.equal(a.x, 0);
+});
+test("legacy builds and distinct new circuit records survive save validation", () => {
+  const p = sanitize({
+    vehicle: "vector",
+    records: {
+      "coast-clear-vector-pure": 42,
+      "singapore-clear-vector-pure": 91,
+      "monaco-rain-vector-pure": 108,
+    },
+  });
+  assert.equal(p.vehicle, "vector");
+  assert.equal(Object.keys(p.records).length, 3);
+});
 test("track geometry closes and nearest point recovers driving position", () => {
   for (const data of TRACKS) {
     const track = new Track(data);
@@ -45,7 +103,7 @@ test("render frame grouping does not change the fixed-step simulation", () => {
   assert.ok(Math.abs(a.speed - b.speed) < 0.01);
 });
 test("drifting charges and grants a release boost", () => {
-  const t = new Track(TRACKS[0]),
+  const t = new Track({ ...TRACKS[2], width: 120 }),
     k = makeKart(t, vehicleStats(profile()));
   k.speed = 20;
   k.vx = Math.sin(k.heading) * 20;

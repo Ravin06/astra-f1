@@ -42,7 +42,9 @@ export function sanitize(raw = {}) {
   if (raw.records && typeof raw.records === "object")
     for (const [k, v] of Object.entries(raw.records))
       if (
-        /^(coast|canyon|night)-(clear|rain|fog)-/.test(k) &&
+        /^(coast|canyon|night|singapore|monaco|silverstone|suzuka)-(clear|rain|fog)-/.test(
+          k,
+        ) &&
         Number.isFinite(v) &&
         v > 0
       )

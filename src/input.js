@@ -16,14 +16,9 @@ export class Input {
       }
       if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
       if (
-        [
-          "Space",
-          "ArrowUp",
-          "ArrowDown",
-          "ArrowLeft",
-          "ArrowRight",
-          "Tab",
-        ].includes(e.code)
+        ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(
+          e.code,
+        )
       )
         e.preventDefault();
       this.keys.add(e.code);

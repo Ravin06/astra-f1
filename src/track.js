@@ -5,19 +5,42 @@ export class Track {
   constructor(data) {
     this.data = data;
     this.width = data.width;
-    this.samples = 720;
-    this.curve = new THREE.CatmullRomCurve3(
-      data.points.map(([x, z], i) => new THREE.Vector3(x, 0, z)),
-      true,
-      "centripetal",
+    this.samples = 1080;
+    const xs = data.points.map((p) => p[0]),
+      zs = data.points.map((p) => p[1]);
+    const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
+    const cz = (Math.min(...zs) + Math.max(...zs)) / 2;
+    const rawPoints = data.points.map(
+      ([x, z]) => new THREE.Vector3(x - cx, 0, z - cz),
     );
+    this.curve = new THREE.CatmullRomCurve3(rawPoints, true, "centripetal");
     this.curve.arcLengthDivisions = 2400;
+    if (data.targetLength) {
+      const scale = data.targetLength / this.curve.getLength();
+      this.curve.points.forEach((p) => p.multiplyScalar(scale));
+      this.curve.updateArcLengths();
+    }
     this.length = this.curve.getLength();
+    this.hasAuthoredHeight = data.points.some((p) => p.length > 2);
     this.points = Array.from({ length: this.samples }, (_, i) =>
       this.at(i / this.samples),
     );
+    this.bounds = {
+      minX: Math.min(...this.points.map((p) => p.x)),
+      maxX: Math.max(...this.points.map((p) => p.x)),
+      minZ: Math.min(...this.points.map((p) => p.z)),
+      maxZ: Math.max(...this.points.map((p) => p.z)),
+    };
   }
   height(t) {
+    if (this.hasAuthoredHeight) {
+      const f = this.curve.getUtoTmapping(wrap(t, 1)) * this.data.points.length;
+      const i = Math.floor(f),
+        blend = f - i;
+      const a = this.data.points[i % this.data.points.length][2] || 0;
+      const b = this.data.points[(i + 1) % this.data.points.length][2] || 0;
+      return 0.35 + a + (b - a) * blend * blend * (3 - 2 * blend);
+    }
     return 0.35 + this.data.elevation * (1 - Math.cos(t * Math.PI * 4)) * 0.5;
   }
   at(t, offset = 0) {
@@ -54,15 +77,36 @@ export class Track {
       for (let j = -28; j <= 28; j++) scan(center + j);
       if (best > 900) for (let i = 0; i < this.samples; i++) scan(i);
     }
-    const a = this.points[index],
-      b = this.points[(index + 1) % this.samples];
+    // Project onto both neighboring segments; the closest vertex can lie ahead
+    // of the car, especially on the tighter street-circuit hairpins.
+    let segment = index,
+      bestProjection = Infinity,
+      bestFraction = 0;
+    for (const candidate of [wrap(index - 1, this.samples), index]) {
+      const a = this.points[candidate],
+        b = this.points[(candidate + 1) % this.samples];
+      const dx = b.x - a.x,
+        dz = b.z - a.z;
+      const f = Math.max(
+        0,
+        Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / (dx * dx + dz * dz)),
+      );
+      const d = (x - a.x - dx * f) ** 2 + (z - a.z - dz * f) ** 2;
+      if (d < bestProjection) {
+        bestProjection = d;
+        segment = candidate;
+        bestFraction = f;
+      }
+    }
+    const a = this.points[segment],
+      b = this.points[(segment + 1) % this.samples];
     const dx = b.x - a.x,
       dz = b.z - a.z;
     const f = Math.max(
       0,
       Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / (dx * dx + dz * dz)),
     );
-    const p = this.at((index + f) / this.samples);
+    const p = this.at((segment + bestFraction) / this.samples);
     const offset =
       (x - p.x) * Math.cos(p.heading) - (z - p.z) * Math.sin(p.heading);
     return { ...p, offset, distance: Math.hypot(x - p.x, z - p.z) };

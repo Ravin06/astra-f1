@@ -1,6 +1,6 @@
 {
   "name": "apex-coastline-racing",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,9 @@
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0 --port 8790",
     "test": "node tests/simulation.test.js",
-    "test:browser": "node tests/browser.mjs"
+    "test:browser": "node tests/browser.mjs",
+    "test:playthrough": "node tests/playthrough.mjs",
+    "format": "prettier --write src tests"
   },
   "dependencies": {
     "three": "0.180.0"

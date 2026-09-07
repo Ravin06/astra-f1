@@ -106,7 +106,7 @@ export function stepKart(k, input, track, dt, options = {}) {
   // Bicycle steering with saturated tire forces; lateral velocity survives a drift.
   const wheelAngle = k.steer * (0.46 / (1 + Math.abs(forward) * 0.026));
   const desiredYaw =
-    (forward / 2.05) * Math.tan(wheelAngle) * (drifting ? 1.2 : 1);
+    (forward / 2.4) * Math.tan(wheelAngle) * (drifting ? 1.2 : 1);
   const maxYaw = (grip * 1.7) / Math.max(6, Math.abs(forward));
   k.yaw +=
     (clamp(desiredYaw, -maxYaw, maxYaw) - k.yaw) *
@@ -158,13 +158,14 @@ export function stepKart(k, input, track, dt, options = {}) {
       : 0;
 }
 export function collide(a, b, damage = false) {
+  if (Math.abs(a.y - b.y) > 2.2) return;
   const dx = b.x - a.x,
     dz = b.z - a.z,
     d = Math.hypot(dx, dz);
-  if (d >= 2.15 || d < 0.001) return;
+  if (d >= 3.0 || d < 0.001) return;
   const nx = dx / d,
     nz = dz / d,
-    overlap = (2.15 - d) * 0.5;
+    overlap = (3.0 - d) * 0.5;
   a.x -= nx * overlap;
   a.z -= nz * overlap;
   b.x += nx * overlap;

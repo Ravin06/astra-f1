@@ -3,6 +3,9 @@ import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.j
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { VEHICLES } from "./data.js";
+import { createFormulaCar } from "./formula-car.js";
+import { addCircuitScenery } from "./circuit-scenery.js";
+export { createFormulaCar as createKart } from "./formula-car.js";
 const mat = (color, roughness = 0.7, metalness = 0) =>
   new T.MeshStandardMaterial({ color, roughness, metalness });
 const seeded =
@@ -54,7 +57,7 @@ function textTexture(
   tex.colorSpace = T.SRGBColorSpace;
   return tex;
 }
-export function createKart(profile, withDriver = true) {
+export function createLegacyKart(profile, withDriver = true) {
   const g = new T.Group(),
     v = VEHICLES.find((v) => v.id === profile.vehicle) || VEHICLES[0];
   const paint = new T.MeshPhysicalMaterial({
@@ -546,7 +549,8 @@ export class Graphics {
       0,
     );
     earth.rotation.x = -Math.PI / 2;
-    if (!canyon) {
+    const coastEdge = track.bounds.minX - 65;
+    if (!canyon && track.data.theme !== "park") {
       const sea = mesh(
         new T.PlaneGeometry(2000, 2000),
         new T.MeshPhysicalMaterial({
@@ -556,7 +560,7 @@ export class Graphics {
           clearcoat: 1,
         }),
         this.group,
-        -1100,
+        coastEdge - 1000,
         -0.7,
         0,
       );
@@ -564,7 +568,7 @@ export class Graphics {
       const beach = box(
         this.group,
         mat("#c2b694"),
-        -129,
+        coastEdge + 22,
         -0.8,
         0,
         50,
@@ -574,7 +578,7 @@ export class Graphics {
       // Original harbor silhouettes: boats, breakwater and a coastal beacon.
       for (let i = 0; i < 6; i++) {
         const boat = new T.Group();
-        boat.position.set(-183 - i * 18, -0.3, -80 + i * 37);
+        boat.position.set(coastEdge - 30 - i * 18, -0.3, -80 + i * 37);
         boat.rotation.y = 0.3 + i * 0.35;
         this.group.add(boat);
         const hull = mesh(
@@ -600,7 +604,7 @@ export class Graphics {
         );
       }
       const beacon = new T.Group();
-      beacon.position.set(-137, 0, 125);
+      beacon.position.set(coastEdge + 9, 0, 125);
       this.group.add(beacon);
       cylinder(beacon, mat("#d6cbb1"), 0, 8, 0, 1.5, 2.6, 16, 16);
       cylinder(beacon, mat("#c96743"), 0, 13, 0, 1.85, 1.85, 2);
@@ -613,7 +617,7 @@ export class Graphics {
       for (let i = 0; i < 110; i++) {
         const geo = new T.PlaneGeometry(4 + rng() * 35, 0.16);
         geo.rotateX(-Math.PI / 2);
-        geo.translate(-165 - rng() * 260, -0.67, (rng() - 0.5) * 900);
+        geo.translate(coastEdge - 15 - rng() * 260, -0.67, (rng() - 0.5) * 900);
         waveGeo.push(geo);
       }
       batchBoxes(
@@ -717,7 +721,7 @@ export class Graphics {
     startGroup.position.set(start.x, start.y, start.z);
     startGroup.rotation.y = start.heading;
     this.group.add(startGroup);
-    for (let x = 0; x < 14; x++)
+    for (let x = 0; x < Math.ceil(track.width); x++)
       for (let z = 0; z < 2; z++)
         box(
           startGroup,
@@ -754,7 +758,7 @@ export class Graphics {
       new T.PlaneGeometry(track.width + 2.7, 0.95),
       new T.MeshBasicMaterial({
         map: textTexture(
-          "APEX   /   COASTLINE RACING",
+          "APEX   /   GRAND CIRCUIT",
           "#20292c",
           "#f0ecdf",
           1536,
@@ -815,7 +819,7 @@ export class Graphics {
         side = random() > 0.4 ? 1 : -1,
         offset = side * (track.width / 2 + 7 + random() * 34);
       const p = track.at(t, offset);
-      if (p.x < -119 && !canyon) continue;
+      if (p.x < coastEdge && !canyon) continue;
       if (track.nearest(p.x, p.z).distance < track.width / 2 + 5) continue;
       treePositions.push(p);
     }
@@ -832,7 +836,7 @@ export class Graphics {
         rock.scale.set(1, 1.3 + random() * 2, 1);
         rock.rotation.y = random() * 6;
       }
-    } else
+    } else if (track.data.theme !== "park")
       for (const [i, p] of treePositions.entries())
         this.palm(p.x, p.y, p.z, 0.75 + random() * 0.65, i);
     // The paddock, grandstand, and original track sponsors.
@@ -882,7 +886,8 @@ export class Graphics {
         rad = 340 + random() * 100,
         x = 70 + Math.cos(a) * rad,
         z = Math.sin(a) * rad;
-      if (x < -120 && !canyon) continue;
+      if (track.data.theme === "park" || (x < coastEdge && !canyon)) continue;
+      if (track.nearest(x, z).distance < 55) continue;
       if (night) {
         const h = 20 + random() * 80,
           b = box(
@@ -934,6 +939,7 @@ export class Graphics {
         );
       }
     }
+    addCircuitScenery(this.group, track);
     this.makeRain();
     this.cameraReady = false;
   }
@@ -1010,7 +1016,7 @@ export class Graphics {
       this.disposeGroup(g);
     }
     this.karts = profiles.map((p) => {
-      const g = createKart(p);
+      const g = createFormulaCar(p);
       this.scene.add(g);
       return g;
     });
@@ -1043,7 +1049,11 @@ export class Graphics {
       });
       p = states[0];
     } else {
-      p = { ...this.track.at(0.9, -1.6), speed: 0, steer: 0.22 };
+      p = {
+        ...this.track.at(this.track.data.showcaseT || 0.02, -1.6),
+        speed: 0,
+        steer: 0.12,
+      };
       this.updateKart(this.karts[0], p, dt);
     }
     const target = new T.Vector3(p.x, p.y + 0.85, p.z),
@@ -1054,11 +1064,21 @@ export class Graphics {
         ? 0
         : Math.sin(this.time * 0.13) * 0.06;
       const a = p.heading - 1.0 + orbit;
-      pos.set(p.x + Math.sin(a) * 8.8, p.y + 3.4, p.z + Math.cos(a) * 8.8);
+      const distance = innerWidth < 700 ? 15.8 : 11.2;
+      pos.set(
+        p.x + Math.sin(a) * distance,
+        p.y + 3.5,
+        p.z + Math.cos(a) * distance,
+      );
       const right = new T.Vector3(Math.cos(a), 0, -Math.sin(a));
       look.copy(target).addScaledVector(right, innerWidth < 700 ? -0.1 : -1.8);
       look.y -= 0.6;
-      this.camera.fov = page === "garage" || page === "driver" ? 39 : 42;
+      this.camera.fov =
+        innerWidth < 700
+          ? 49
+          : page === "garage" || page === "driver"
+            ? 39
+            : 42;
     } else {
       const mode = page === "replay" ? 3 : profile.settings.camera;
       const forward = new T.Vector3(
@@ -1069,19 +1089,19 @@ export class Graphics {
       if (mode === 0) {
         pos
           .copy(target)
-          .addScaledVector(forward, -7.4 - Math.abs(p.speed) * 0.045);
+          .addScaledVector(forward, -9.4 - Math.abs(p.speed) * 0.038);
         pos.y += 3.2;
         look.copy(target).addScaledVector(forward, 6);
       }
       if (mode === 1) {
-        pos.copy(target).addScaledVector(forward, 0.4);
-        pos.y += 0.88;
+        pos.copy(target).addScaledVector(forward, 0.0);
+        pos.y += 0.6;
         look.copy(pos).addScaledVector(forward, 12);
         look.y -= 0.5;
       }
       if (mode === 2) {
-        pos.copy(target).addScaledVector(forward, 1.5);
-        pos.y += 0.1;
+        pos.copy(target).addScaledVector(forward, 2.0);
+        pos.y -= 0.15;
         look.copy(pos).addScaledVector(forward, 15);
       }
       if (mode === 3) {

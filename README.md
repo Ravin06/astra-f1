@@ -1,6 +1,6 @@
-# APEX / Coastline Racing
+# APEX / Grand Circuit
 
-An original, local, single-player 3D kart racer, built in a new independent folder. It runs in a modern desktop browser with WebGL 2 and hardware acceleration. No existing project or external account is required.
+An original, local, single-player 3D open-wheel arcade racer, built in a new independent folder. It runs in a modern desktop browser with WebGL 2 and hardware acceleration. No existing project or external account is required.
 
 **Delivery status: playable vertical slice, not a finished AAA or commercially ready game.** The original procedural models and environments are stylized. They are not photorealistic assets. All available menu actions operate real local systems; there is no simulated multiplayer.
 
@@ -44,12 +44,12 @@ Hold drift through a corner, counter-steer to regulate the slide, then release a
 
 ## Implemented
 
-- Three original closed circuits: Azure Coast, Ember Canyon, and Afterlight. Each has its own road geometry and elevation profile. Scenery includes curbs, barriers, palms or rock formations, a paddock, sponsor signs, city towers, and a coastal harbor.
-- Three kart configurations with different mass, power, speed limits, grip, braking, and nose shapes; procedural wheels, mechanical parts, bodywork, headlights, wing, driver suit, and helmet.
+- Four widened, arcade-scale circuits based on real Grand Prix layouts: Singapore / Marina Bay (2.50 km, 22 m wide), Monaco / Monte Carlo (2.35 km, 18 m), Silverstone (2.90 km, 26 m), and Suzuka (2.85 km, 24 m). Scenery includes a Singapore-inspired skyline, Monaco tunnel, grandstands, braking boards, pit buildings, and Suzuka’s raised figure-eight crossing. These are hand-authored approximations, not exact surveyed recreations. References and design changes are documented in [CIRCUITS.md](CIRCUITS.md).
+- Three formula-car configurations: Vortex F1X, Vector GP, and Comet Formula. Long tapered noses, sculpted sidepods, exposed slick tires, wishbones, multi-element front wings, rear wings, halo cockpits, and seated drivers replace the original kart silhouette. Speed limits are approximately 25% higher, with stronger acceleration, braking and grip.
 - Fixed 120 Hz driving simulation with longitudinal acceleration/braking, drag, lateral velocity, tire-force-limited yaw, drift, boost, off-road slowdown, barrier response, kart collisions, and optional impact-related performance damage.
 - Ordered checkpoint validation, lap timing, race start countdown, position ranking, pause/resume, reset safeguards, best laps, and results. AI drivers use look-ahead steering, curvature-based corner speeds, lane variation, traffic avoidance, and items.
 - Quick Race, Custom Race, Time Trial, and unlimited Practice. Up to seven AI opponents, three difficulty settings, configurable laps, collision rules, items, and performance damage.
-- Clear, rain, and fog presets. Rain reduces tire grip and changes road material properties; rain particles and tire spray are implemented. Nighttime lighting belongs to the Afterlight track.
+- Clear, rain, and fog presets. Rain reduces tire grip and changes road material properties; rain particles and tire spray are implemented. Nighttime lighting belongs to the Marina Bay track.
 - Garage: vehicle selection, eight paint colors, matte/metallic finishes, wing visibility, engine output, tire grip, downforce, steering ratio, live statistics, and test drive. Named presets can be saved, duplicated by saving under another name, loaded, exported, and imported as JSON.
 - Driver: three original identities, helmet and suit colors, and a two-digit racing number. Driver selection does not confer a performance advantage.
 - Chase, cockpit, hood, and orbit/cinematic cameras. HUD includes speed, an automatic speed-derived gear/RPM display, position, laps, timers, minimap, boost reserve, drift charge, item status, and optional damage condition.
@@ -65,7 +65,7 @@ Hold drift through a corner, counter-steer to regulate the slide, then release a
 - AI is competent at following the supplied racing line and completing laps. It has no alternate-route graph, learned strategy, deep defensive tactics, or destructible-object awareness. Difficulty changes target pace; there is no position-based teleportation or rubber banding.
 - Graphics use physically based materials, environment lighting, shadow maps, fog, and procedural textures. There is no ray tracing, true wet-road planar reflection, screen-space ambient occlusion, volumetric lighting, global illumination solution, high-resolution asset library, or postprocess motion blur/depth of field.
 - Weather is selected before a race; it does not evolve during a race. Track objects do not deform or break. Damage affects performance and telemetry, not mesh deformation.
-- Tuning covers four parameters, not the entire requested motorsport tuning catalog. Cosmetic wing visibility is separate from the downforce slider. Headlights, wheels, bumpers, and engines are modeled but are not separately interchangeable parts.
+- Tuning covers four parameters, not the entire requested motorsport tuning catalog. Cosmetic wing visibility is separate from the downforce slider. Wheels, wings, sidepods, and engine covers are modeled but are not separately interchangeable parts.
 - Character customization changes identity, colors, and number, not facial morphology, hair, proportions, animations, or voice packs.
 - Gear and RPM are presentation estimates. Audio is synthesized, not recorded automotive sound. No licensed music, voice acting, or convolution reverb is included.
 - Time Trial records times but does not yet provide a ghost. Replay is a bounded in-memory transform recording (approximately ten minutes), not persistent video export or deterministic input playback.
@@ -89,8 +89,8 @@ npm run test:browser
 
 The browser test uses Playwright. If Chromium is not installed, run `npx playwright install chromium`. `CHROMIUM_PATH` can point to an existing Chromium executable; `GAME_URL` can override the default test URL. On the development machine it detects the preinstalled Chromium binary. Test screenshots are saved to `test-results/`.
 
-Simulation tests exercise track closure, nearest-point projection, tuning trade-offs, fixed-step consistency, drift boosts, lap exploit rejection, checkpoint reset penalties, item counterplay, pause, imported data validation, and AI lap completion. Browser tests exercise real menus, customization, saved presets across reload, keyboard driving, pause/resume, camera switching, all tracks, and narrow viewport layout. See [TESTING.md](TESTING.md) for the latest observed validation and limits.
+Simulation tests exercise track closure, nearest-point projection, tuning trade-offs, fixed-step consistency, drift boosts, lap exploit rejection, checkpoint reset penalties, item counterplay, pause, imported data validation, and AI lap completion. Browser tests exercise real menus, customization, saved presets across reload, keyboard driving, pause/resume, camera switching, all four tracks, and narrow viewport layout. See [TESTING.md](TESTING.md) for the latest observed validation and limits.
 
 ## Originality and third-party components
 
-All game geometry, tracks, code, visual branding, fictional driver identities, item concepts, and synthesized audio were created for this project. No Nintendo assets, characters, music, track layouts, or names are used. Three.js is MIT licensed; Vite and Playwright retain their upstream licenses. Barlow is by Jeremy Tribby and distributed under the SIL Open Font License. The font license is included under `public/fonts/`.
+All car and scenery geometry, code, visual branding, fictional driver identities, item concepts, and synthesized audio were created for this project. The current circuit centerlines were hand-authored using the real-world circuit diagrams linked in CIRCUITS.md; the game does not bundle the reference images or official team liveries. No Nintendo assets, characters, music, track layouts, or names are used. Three.js is MIT licensed; Vite and Playwright retain their upstream licenses. Barlow is by Jeremy Tribby and distributed under the SIL Open Font License. The font license is included under `public/fonts/`.

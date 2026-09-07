@@ -97,10 +97,13 @@ try {
   await page.click(".logo");
   await page.click('[data-action="track"][data-value="1"]');
   await page.waitForTimeout(700);
-  await page.screenshot({ path: "test-results/canyon.png" });
+  await page.screenshot({ path: "test-results/monaco.png" });
   await page.click('[data-action="track"][data-value="2"]');
   await page.waitForTimeout(700);
-  await page.screenshot({ path: "test-results/night.png" });
+  await page.screenshot({ path: "test-results/silverstone.png" });
+  await page.click('[data-action="track"][data-value="3"]');
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: "test-results/suzuka.png" });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.click('[data-action="track"][data-value="0"]');
   await page.waitForTimeout(700);
@@ -114,7 +117,7 @@ try {
   );
   assert.deepEqual(errors, [], "no browser runtime or rendering errors");
   console.log(
-    "PASS: menus, garage, character, preset persistence, keyboard driving, pause, camera, three tracks, mobile layout.",
+    "PASS: menus, garage, character, preset persistence, keyboard driving, pause, camera, four Grand Prix-inspired tracks, mobile layout.",
   );
 } finally {
   console.log("Browser errors:", errors);
